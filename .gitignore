@@ -1,0 +1,56 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# === [Firebase 보안 키] ===
+# 이 파일들은 절대 GitHub에 올라가면 안 됩니다!
+**/firebase-admin.json
+**/firebase-key.json
+*firebase*.json
+
+# === [IntelliJ IDE 설정] ===
+.idea/
+*.iml
+out/
+
+# === [OS 파일] ===
+.DS_Store
+Thumbs.db
+
+# === [기타 비밀 키 (추후 환경변수 분리용)] ===
+application-secret.yml
+.env
