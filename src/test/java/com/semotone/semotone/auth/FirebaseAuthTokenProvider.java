@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class FirebaseAuthTokenProvider {
     // Firebase Console -> 프로젝트 설정 -> 일반 -> Web API 키
-    private static final String API_KEY = "REDACTED_FIREBASE_WEB_API_KEY";
+    private static final String API_KEY = "input_your_Web_api_key";
     private static final String AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + API_KEY;
 
     public String getTestToken(String email, String password) {

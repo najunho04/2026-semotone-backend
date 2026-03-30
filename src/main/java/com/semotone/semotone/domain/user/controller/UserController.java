@@ -1,6 +1,7 @@
 package com.semotone.semotone.domain.user.controller;
 
 import com.semotone.semotone.domain.user.dto.UserCreateReqDto;
+import com.semotone.semotone.domain.user.dto.UserLocationUpdateReqDto;
 import com.semotone.semotone.domain.user.dto.UserResDto;
 import com.semotone.semotone.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +30,36 @@ public class UserController {
         UserResDto response = userService.signUp(uid, email, dto);
 
         return ResponseEntity.ok(response); // HTTP 200 상태코드와 함께 응답!
+    }
+
+    // PATCH http://localhost:8080/api/users/location
+    // 위치 정보 동기화
+    @PatchMapping("/location")
+    public ResponseEntity<Void> updateLocation(
+            @RequestBody UserLocationUpdateReqDto dto,
+            Authentication authentication // JwtFilter가 검증해둔 토큰 정보
+    ) {
+        String uid = (String) authentication.getPrincipal(); // 토큰에서 UID 추출
+
+        userService.updateUserLocation(uid, dto);
+
+        // 데이터 반환 없이 '200 OK'만 빠르게 던져줍니다. (네트워크 비용 절약)
+        return ResponseEntity.ok().build();
+    }
+
+    // GET http://localhost:8080/api/users/me
+    // 본인 정보 가져오기
+    @GetMapping("/me")
+    public ResponseEntity<UserResDto> getMyProfile(
+            Authentication authentication // 어김없이 등장하는 JwtFilter의 산물!
+    ) {
+        // 1. 토큰 보관함에서 내 고유 UID를 꺼냅니다. (안전함 보장)
+        String uid = (String) authentication.getPrincipal();
+
+        // 2. Service에게 내 UID를 주고 프로필(DTO)을 받아옵니다.
+        UserResDto response = userService.getMyProfile(uid);
+
+        // 3. 200 OK 상태 코드와 함께 JSON 데이터로 응답합니다.
+        return ResponseEntity.ok(response);
     }
 }

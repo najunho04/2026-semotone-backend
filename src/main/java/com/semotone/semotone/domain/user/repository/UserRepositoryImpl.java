@@ -86,6 +86,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    //아직 Service 단계에서 미구현
     @Override
     public void addPostIdToUser(String uid, String postId) {
         try {
@@ -100,4 +101,23 @@ public class UserRepositoryImpl implements UserRepository {
             throw new RuntimeException("DB 업데이트 중 오류가 발생했습니다.");
         }
     }
+
+    @Override
+    public void updateLocation(String uid, double latitude, double longitude) {
+        try {
+            // 수정할 필드만 Map에 담습니다.
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("latitude", latitude);
+            updates.put("longitude", longitude);
+
+            // 해당 uid 문서의 지정된 필드만 덮어씁니다.
+            getDb().collection(COLLECTION_NAME).document(uid).update(updates).get();
+            log.info("Firestore: 유저 위치 업데이트 완료 [UID: {}]", uid);
+        } catch (Exception e) {
+            log.error("Firestore 유저 위치 업데이트 실패", e);
+            throw new RuntimeException("위치 정보 업데이트 중 오류가 발생했습니다.");
+        }
+    }
+
+
 }

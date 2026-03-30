@@ -22,7 +22,9 @@ public class UserEntity {
     private int point;
     private List<String> myPosts; // 작성한 게시글 ID 리스트
     private int acceptCount;
-    private GeoPoint currentLocation; // 서브 컬렉션 대신 GeoPoint 사용 권장
+    private double latitude;
+    private double longitude;
+
 
     // chatLog는 서브 컬렉션이므로 Entity 필드에 포함하지 않고 DB 참조로만 사용합니다.
 }

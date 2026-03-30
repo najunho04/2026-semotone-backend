@@ -32,11 +32,19 @@ public interface UserRepository {
      * - 포인트를 차감할 때는 addPoint에 음수(-50)를 넣으면 됩니다.
      */
     void addPointAndAcceptCount(String uid, int addPoint, int addAcceptCount);
+
     /**
      * 5. 작성한 게시글 ID 추가 (배열 업데이트)
      * - 유저가 새로운 게시글을 작성했을 때, User 문서 안의 myPosts 배열에 새로운 postId를 밀어 넣습니다.
+     * -> ** post 로직과 엮여야 해서 아직 미개발
      */
     void addPostIdToUser(String uid, String postId);
+
+    /**
+     * 6. 클라이언트 위치 정보 최신화
+     * - n초에 한번씩 오는 위치 동기화 로직에 대한 DB (Location) 최신화
+     */
+    void updateLocation(String uid, double latitude, double longitude);
 
     Firestore getDb();
 }
