@@ -15,7 +15,7 @@ public class FirebaseConfig {
     public void initialize() {
         try {
             // src/main/resources/ 에 있는 키 파일을 읽어옵니다.
-            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("khu-semotone-backend-firebase-adminsdk-fbsvc-8321a44fda.json");
+            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-key.json");
 
             if (serviceAccount == null) {
                 throw new RuntimeException("firebase-key.json 파일을 찾을 수 없습니다.");
