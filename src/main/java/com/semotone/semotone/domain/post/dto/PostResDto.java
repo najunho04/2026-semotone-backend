@@ -12,24 +12,24 @@ public class PostResDto {
     private String userId; // 작성자
     private String title;
     private String content;
-    private long createdAt; // 클라이언트가 파싱하기 쉽게 Epoch Time(Millis)으로 변환해서 주는 것이 좋습니다.
+    private long createdAt;
     private boolean isAccept;
-    private String acceptedUserId;
+    private String accepted_userId;
     private double latitude;
     private double longitude;
 
-    // Entity -> DTO 변환 정적 메서드 (Service에서 사용하면 매우 편함)
+    // Entity -> DTO 변환 정적 메서드
     public static PostResDto fromEntity(String postId, PostEntity entity) {
         return PostResDto.builder()
                 .postId(postId)
                 .userId(entity.getUserId())
                 .title(entity.getTitle())
                 .content(entity.getContent())
-                .createdAt(entity.getIsCreated().toDate().getTime())
+                .createdAt(entity.getIsCreated() != null ? entity.getIsCreated().toDate().getTime() : 0L)
                 .isAccept(entity.isAccept())
-                .acceptedUserId(entity.getAcceptedUserId())
-                .latitude(entity.getLocation().getLatitude())
-                .longitude(entity.getLocation().getLongitude())
+                .accepted_userId(entity.getAccepted_userId())
+                .latitude(entity.getLocation() != null ? entity.getLocation().getLatitude() : 0.0)
+                .longitude(entity.getLocation() != null ? entity.getLocation().getLongitude() : 0.0)
                 .build();
     }
 }
