@@ -2,6 +2,7 @@ package com.semotone.semotone.domain.user.service;
 
 
 import com.semotone.semotone.domain.user.dto.UserCreateReqDto;
+import com.semotone.semotone.domain.user.dto.UserLocationResDto;
 import com.semotone.semotone.domain.user.dto.UserLocationUpdateReqDto;
 import com.semotone.semotone.domain.user.dto.UserResDto;
 import com.semotone.semotone.domain.user.entity.UserEntity;
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService {
 
         // 2. DTO + Token 정보를 합쳐서 DB에 넣을 Entity로 조립
         UserEntity userEntity = UserEntity.builder()
+                .userId(uid)
                 .nickName(dto.getNickName())
                 .gmail(email)          // 토큰에서 뽑은 진짜 이메일
                 .point(1000)           // ★ 신규 가입 보너스 1000 포인트!
@@ -67,7 +69,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResDto getUserProfile(String targetUid) {
-        return null;
+        // 1. DB에서 UID로 유저 문서를 찾아옵니다. (없으면 에러 발생!)
+        UserEntity userEntity = userRepository.findById(targetUid)
+                .orElseThrow(() -> new RuntimeException("가입된 유저 정보를 찾을 수 없습니다."));
+
+        // 2. 찾아온 Entity의 정보를 쏙쏙 뽑아서 클라이언트에게 보낼 DTO 박스에 담아줍니다.
+        return UserResDto.builder()
+                .uid(targetUid)
+                .nickName(userEntity.getNickName())
+                .gmail(userEntity.getGmail())
+                .point(userEntity.getPoint())
+                .acceptCount(userEntity.getAcceptCount())
+                // 만약 프론트에서 내 위치 정보나 게시글 목록도 필요하다고 하면 여기서 추가로 담아주면 됩니다!
+                // .latitude(userEntity.getLatitude())
+                // .longitude(userEntity.getLongitude())
+                .build();
     }
 
     @Override
@@ -89,6 +105,20 @@ public class UserServiceImpl implements UserService {
     public void addPostIdToUser(String uid, String postId) {
         // 복잡한 계산 없이 바로 Repository로 던져서 동시성 문제 없이 배열에 추가합니다.
         userRepository.addPostIdToUser(uid, postId);
+    }
+
+    @Override
+    public UserLocationResDto getMyLocation(String uid) {
+        // 1. DB에서 UID로 유저 문서를 찾아옵니다. (없으면 에러 발생!)
+        UserEntity userEntity = userRepository.findById(uid)
+                .orElseThrow(() -> new RuntimeException("가입된 유저 정보를 찾을 수 없습니다."));
+
+        // 2. 찾아온 Entity의 정보를 쏙쏙 뽑아서 클라이언트에게 보낼 DTO 박스에 담아줍니다.
+        return UserLocationResDto.builder()
+                .uid(uid)
+                .latitude(userEntity.getLatitude())
+                .longitude(userEntity.getLongitude())
+                .build();
     }
 
 

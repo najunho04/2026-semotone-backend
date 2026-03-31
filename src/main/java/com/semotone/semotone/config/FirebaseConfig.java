@@ -9,15 +9,16 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
 
-    @PostConstruct
-    public void initialize() {
+    @Bean // 이 어노테이션이 있어야 스프링이 'Firestore'를 관리해줘.
+    public Firestore firestore() {
         try {
-            // src/main/resources/ 에 있는 키 파일을 읽어옵니다.
             InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-key.json");
 
             if (serviceAccount == null) {
@@ -28,18 +29,16 @@ public class FirebaseConfig {
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 
-            // 이미 초기화되어 있는지 확인 후 초기화
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
                 System.out.println("Firebase Admin SDK 초기화 성공!");
             }
-        } catch (Exception e) {
-            System.out.println("Firebase Admin SDK 초기화 Error 발생!: " + e);
-        }
-    }
 
-    @Bean
-    public Firestore firestore() {
-        return FirestoreClient.getFirestore();
+            // 초기화된 FirebaseApp에서 Firestore 객체를 가져와 빈으로 등록!
+            return FirestoreClient.getFirestore();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Firebase 초기화 중 에러 발생", e);
+        }
     }
 }

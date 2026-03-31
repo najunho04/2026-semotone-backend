@@ -26,5 +26,6 @@ public class PostEntity {
     private boolean isAccept;
 
     private String accepted_userId; // 수락한 유저의 UID (초기엔 null)
-    private GeoPoint location;
+    private double latitude;
+    private double longitude;
 }

@@ -17,6 +17,7 @@ import java.util.List;
 public class UserEntity {
     // uid는 문서의 ID(Key)로 사용되므로 내부에 필드로 중복 저장하지 않아도 되지만,
     // 필요에 따라 필드로 가지고 있어도 무방합니다.
+    private String userId;
     private String nickName;
     private String gmail;
     private int point;

@@ -1,6 +1,7 @@
 package com.semotone.semotone.domain.user.controller;
 
 import com.semotone.semotone.domain.user.dto.UserCreateReqDto;
+import com.semotone.semotone.domain.user.dto.UserLocationResDto;
 import com.semotone.semotone.domain.user.dto.UserLocationUpdateReqDto;
 import com.semotone.semotone.domain.user.dto.UserResDto;
 import com.semotone.semotone.domain.user.service.UserService;
@@ -9,15 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/users") // 클래스 레벨에 공통 URL을 빼둡니다.
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
     // POST http://localhost:8080/api/users (회원가입)
-    @PostMapping
+    @PostMapping("/auth/login")
     public ResponseEntity<UserResDto> signUp(
             @RequestBody UserCreateReqDto dto,
             Authentication authentication // JwtFilter가 넣어준 토큰 정보 보관함!
@@ -47,9 +49,9 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    // GET http://localhost:8080/api/users/me
+    // GET http://localhost:8080/users/me
     // 본인 정보 가져오기
-    @GetMapping("/me")
+    @GetMapping("/users/me")
     public ResponseEntity<UserResDto> getMyProfile(
             Authentication authentication // 어김없이 등장하는 JwtFilter의 산물!
     ) {
@@ -58,6 +60,31 @@ public class UserController {
 
         // 2. Service에게 내 UID를 주고 프로필(DTO)을 받아옵니다.
         UserResDto response = userService.getMyProfile(uid);
+
+        // 3. 200 OK 상태 코드와 함께 JSON 데이터로 응답합니다.
+        return ResponseEntity.ok(response);
+    }
+
+    // GET http://localhost:8080/users/{userId}
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserResDto> getUserProfile(
+            Authentication authentication,
+            @PathVariable String userId
+    ){
+        // 2. Service에게 내 UID를 주고 프로필(DTO)을 받아옵니다.
+        UserResDto response = userService.getUserProfile(userId);
+
+        // 3. 200 OK 상태 코드와 함께 JSON 데이터로 응답합니다.
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/location")
+    public ResponseEntity<UserLocationResDto> getMyLocation(Authentication authentication){
+        // 1. 토큰 보관함에서 내 고유 UID를 꺼냅니다. (안전함 보장)
+        String uid = (String) authentication.getPrincipal();
+
+        // 2. Service에게 내 UID를 주고 위치(DTO)를 받아옵니다.
+        UserLocationResDto response = userService.getMyLocation(uid);
 
         // 3. 200 OK 상태 코드와 함께 JSON 데이터로 응답합니다.
         return ResponseEntity.ok(response);
