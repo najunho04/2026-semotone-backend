@@ -18,6 +18,7 @@ public class UserRepositoryImpl implements UserRepository {
     // Firestore의 컬렉션 이름을 상수로 빼두면 오타를 방지할 수 있습니다.
     private static final String COLLECTION_NAME = "users";
 
+
     /**
      * Firestore DB 인스턴스를 가져오는 헬퍼 메서드입니다.
      * FirebaseConfig에서 초기화가 정상적으로 끝났다면 여기서 바로 꺼내 쓸 수 있습니다.
