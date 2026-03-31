@@ -1,7 +1,9 @@
 package com.semotone.semotone.domain.post.repository;
 
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.semotone.semotone.domain.post.entity.PostEntity;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface PostRepository {
@@ -12,4 +14,17 @@ public interface PostRepository {
      * @return true: 수락 성공 / false: 이미 수락된 게시글
      */
     boolean tryAcceptPost(String postId, String acceptingUserId) throws ExecutionException, InterruptedException;
+
+    /**
+     * 게시글 조회
+     * @return PostEntity
+     */
+    PostEntity findById(String postId) throws ExecutionException, InterruptedException;
+
+    /**
+     * 게시글 전체 조회
+     * @return List<QueryDocumentSnapshot> -> List<PostResDto> 으로 서비스로직에서 return 예정
+     */
+    List<QueryDocumentSnapshot> findAllUnaccepted() throws ExecutionException, InterruptedException;
+
 }

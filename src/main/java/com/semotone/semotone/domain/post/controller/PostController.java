@@ -2,12 +2,14 @@ package com.semotone.semotone.domain.post.controller;
 
 import com.semotone.semotone.domain.post.dto.PostAcceptReqDto;
 import com.semotone.semotone.domain.post.dto.PostCreateReqDto;
+import com.semotone.semotone.domain.post.dto.PostResDto;
 import com.semotone.semotone.domain.post.service.PostService;
-import com.semotone.semotone.domain.post.service.PostServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -17,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 public class PostController {
     private final PostService postService;
 
+    //게시글 생성
     @PostMapping
     public ResponseEntity<String> createPost(@RequestBody PostCreateReqDto reqDto) {
         try {
@@ -26,6 +29,36 @@ public class PostController {
         } catch (ExecutionException | InterruptedException e) {
             return ResponseEntity.internalServerError().body("게시글 생성 실패: " + e.getMessage());
         }
+    }
+    //게시글 목록 조회
+    @GetMapping
+    public ResponseEntity<?> getPostList(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "distance") String sortBy) { // 파라미터가 없으면 distance를 기본값으로 사용
+        try {
+            List<PostResDto> list = postService.getPostList(lat, lng, sortBy);
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("목록 조회 실패: " + e.getMessage());
+        }
+    }
+    //게시글 상세 조회
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPostDetail(@PathVariable String postId) {
+        try {
+            PostResDto resDto = postService.getPostDetail(postId);
+            return ResponseEntity.ok(resDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("상세 조회 실패: " + e.getMessage());
+        }
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
     @PostMapping("/{postId}/accept")

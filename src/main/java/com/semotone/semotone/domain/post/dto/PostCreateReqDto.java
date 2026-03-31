@@ -3,7 +3,7 @@ package com.semotone.semotone.domain.post.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-// 게시글 작성 요청 시 (보안을 위해 userId는 여기서 받지 않음!)
+// 게시글 작성 요청 시 (보안을 위해 userId는 여기서 받지 않음)
 @Getter
 @Setter
 public class PostCreateReqDto {
