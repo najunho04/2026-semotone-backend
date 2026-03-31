@@ -46,5 +46,6 @@ public interface UserRepository {
      */
     void updateLocation(String uid, double latitude, double longitude);
 
+
     Firestore getDb();
 }

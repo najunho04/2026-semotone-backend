@@ -1,6 +1,7 @@
 package com.semotone.semotone.domain.user.service;
 
 import com.semotone.semotone.domain.user.dto.UserCreateReqDto;
+import com.semotone.semotone.domain.user.dto.UserLocationResDto;
 import com.semotone.semotone.domain.user.dto.UserLocationUpdateReqDto;
 import com.semotone.semotone.domain.user.dto.UserResDto;
 
@@ -45,4 +46,6 @@ public interface UserService {
      * - 클라이언트 API가 아닌, PostService 등 내부 로직에서 호출됩니다.
      */
     void addPostIdToUser(String uid, String postId);
+
+    UserLocationResDto getMyLocation(String uid);
 }

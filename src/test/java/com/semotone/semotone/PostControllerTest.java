@@ -3,7 +3,7 @@ package com.semotone.semotone;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.semotone.semotone.domain.post.controller.PostController;
 import com.semotone.semotone.domain.post.dto.PostCreateReqDto;
-import com.semotone.semotone.domain.post.service.PostService;
+import com.semotone.semotone.domain.post.service.PostServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,7 +31,7 @@ class PostControllerTest {
 
     // 핵심: 실제 Firebase DB와 연결되는 Service 대신 '가짜(Mock)' Service를 주입
     @MockitoBean
-    private PostService postService;
+    private PostServiceImpl postServiceImpl;
 
     @Test
     @DisplayName("게시글 생성 API가 정상 작동하는지 테스트")
@@ -45,7 +45,7 @@ class PostControllerTest {
         reqDto.setLongitude(126.9780);
 
         // 💡 가짜 Service가 동작할 행동을 미리 설정 (에러 방지용)
-        Mockito.when(postService.createPost(any(PostCreateReqDto.class)))
+        Mockito.when(postServiceImpl.createPost(any(PostCreateReqDto.class)))
                 .thenReturn("가짜_문서_ID_12345");
 
         // 2. DTO 객체를 JSON 형태의 문자열로 변환

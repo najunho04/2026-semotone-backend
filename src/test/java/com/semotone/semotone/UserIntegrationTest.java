@@ -224,4 +224,43 @@ class UserIntegrationTest {
         // 리스트 안에 방금 넣은 999L이 예쁘게 들어있는지 확인!
         assertThat(updatedUser.get().getMyPosts()).contains(newPostId);
     }
+
+    @Test
+    @DisplayName("내 위치 조회 통합 테스트: GET 요청 시 내 위도/경도 정보를 정상적으로 반환해야 한다.")
+    void getMyLocationIntegrationTest() throws Exception {
+        // given (준비)
+        // 위치 조회를 하려면 DB에 위도/경도 정보가 있는 유저가 먼저 있어야 합니다.
+        UserEntity initialUser = UserEntity.builder()
+                .nickName("위치조회테스터")
+                .gmail("test@example.com")
+                .point(1000)
+                .acceptCount(0)
+                .latitude(37.5665)   // 서울 위도
+                .longitude(126.9780) // 서울 경도
+                .build();
+        userRepository.save(testUid, initialUser);
+
+        // when (실행) & then (검증)
+        // GET 방식은 보낼 데이터(Body)가 없으므로 아주 심플합니다.
+        mockMvc.perform(get("/api/users/me/location") // GET 요청!
+                        .header("Authorization", "Bearer " + realJwtToken)) // 토큰만 달랑 들고 갑니다.
+                .andExpect(status().isOk()) // 1. 통신이 200 OK로 성공했는가?
+                // 2. 날아온 JSON 응답 데이터($.필드명)가 내가 방금 넣은 값과 일치하는가?
+                .andExpect(jsonPath("$.uid").value(testUid))
+                .andExpect(jsonPath("$.latitude").value(37.5665))
+                .andExpect(jsonPath("$.longitude").value(126.9780));
+    }
+
+    @Test
+    @DisplayName("내 위치 조회 실패 테스트: 가입되지 않은 유저의 위치를 조회할 수 없어야 한다.")
+    void getMyLocationFailTest() throws Exception {
+        // given (준비)
+        // 의도적으로 유저를 DB에 저장하지 않습니다. (유저가 존재하지 않음)
+
+        // when (실행) & then (검증)
+        // 존재하지 않는 유저의 위치 조회 요청
+        mockMvc.perform(get("/api/users/me/location") // GET 요청!
+                        .header("Authorization", "Bearer " + realJwtToken))
+                .andExpect(status().isBadRequest()); // 500 에러 (가입되지 않은 유저)
+    }
 }

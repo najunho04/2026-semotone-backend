@@ -28,8 +28,8 @@ public class PostResDto {
                 .createdAt(entity.getIsCreated() != null ? entity.getIsCreated().toDate().getTime() : 0L)
                 .isAccept(entity.isAccept())
                 .accepted_userId(entity.getAccepted_userId())
-                .latitude(entity.getLocation() != null ? entity.getLocation().getLatitude() : 0.0)
-                .longitude(entity.getLocation() != null ? entity.getLocation().getLongitude() : 0.0)
+                .latitude(entity.getLatitude())
+                .longitude(entity.getLongitude())
                 .build();
     }
 }

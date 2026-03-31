@@ -1,6 +1,7 @@
 package com.semotone.semotone.domain.user.repository;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.semotone.semotone.domain.user.entity.UserEntity;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UserRepositoryImplTest {
 
     private UserRepository userRepository;
+    private Firestore firestore;
 
     @BeforeAll
     void setup() throws IOException {
@@ -31,7 +33,7 @@ class UserRepositoryImplTest {
             FirebaseApp.initializeApp(options);
         }
 
-        userRepository = new UserRepositoryImpl();
+        userRepository = new UserRepositoryImpl(firestore);
     }
 
     @Test

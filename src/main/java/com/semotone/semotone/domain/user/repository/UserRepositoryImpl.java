@@ -6,6 +6,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import com.semotone.semotone.domain.user.entity.UserEntity;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -13,11 +14,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
+@RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
 
     // Firestore의 컬렉션 이름을 상수로 빼두면 오타를 방지할 수 있습니다.
     private static final String COLLECTION_NAME = "users";
-
+    private final Firestore firestore;
 
     /**
      * Firestore DB 인스턴스를 가져오는 헬퍼 메서드입니다.
@@ -25,7 +27,7 @@ public class UserRepositoryImpl implements UserRepository {
      */
     @Override
     public Firestore getDb() {
-        return FirestoreClient.getFirestore();
+        return firestore;
     }
 
     @Override
