@@ -3,6 +3,7 @@ package com.semotone.semotone.domain.user.repository;
 import com.google.cloud.firestore.Firestore;
 import com.semotone.semotone.domain.user.entity.UserEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
@@ -46,6 +47,11 @@ public interface UserRepository {
      */
     void updateLocation(String uid, double latitude, double longitude);
 
+
+    /**
+     * 7. 전체 유저 목록 조회
+     */
+    List<UserEntity> findAll();
 
     Firestore getDb();
 }

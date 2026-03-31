@@ -4,12 +4,15 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
-import com.google.firebase.cloud.FirestoreClient;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
 import com.semotone.semotone.domain.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,6 +28,23 @@ public class UserRepositoryImpl implements UserRepository {
      * Firestore DB 인스턴스를 가져오는 헬퍼 메서드입니다.
      * FirebaseConfig에서 초기화가 정상적으로 끝났다면 여기서 바로 꺼내 쓸 수 있습니다.
      */
+    @Override
+    public List<UserEntity> findAll() {
+        try {
+            QuerySnapshot querySnapshot = getDb().collection(COLLECTION_NAME).get().get();
+            List<UserEntity> users = new ArrayList<>();
+            for (QueryDocumentSnapshot doc : querySnapshot.getDocuments()) {
+                UserEntity user = doc.toObject(UserEntity.class);
+                users.add(user);
+            }
+            log.info("Firestore: 전체 유저 조회 완료 [count: {}]", users.size());
+            return users;
+        } catch (Exception e) {
+            log.error("Firestore 전체 유저 조회 실패", e);
+            throw new RuntimeException("DB 조회 중 오류가 발생했습니다.");
+        }
+    }
+
     @Override
     public Firestore getDb() {
         return firestore;

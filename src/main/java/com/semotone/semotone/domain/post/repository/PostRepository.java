@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface PostRepository {
+
+    /**
+     * 게시글 저장
+     * @return postId
+     */
     String save(PostEntity post) throws ExecutionException, InterruptedException;
 
     /**

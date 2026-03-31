@@ -18,6 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -76,9 +79,9 @@ class UserIntegrationTest {
                 """;
 
         // when (실행)
-        // MockMvc를 사용해 "/api/users"로 POST 요청을 보냅니다. (헤더에 토큰 포함!)
+        // MockMvc를 사용해 "/auth/login"로 POST 요청을 보냅니다. (헤더에 토큰 포함!)
         mockMvc.perform( // 1. "자, 가짜 포스트맨! 지금부터 내가 설정한 대로 전송(Send) 버튼을 눌러!"
-                        post("/api/users") // 2. "방식은 POST이고, 목적지 주소는 /api/users 야."
+                        post("/auth/login") // 2. "방식은 POST이고, 목적지 주소는 /api/users 야."
                                 .header("Authorization", "Bearer " + realJwtToken) // 3. "헤더(Header)에 신분증(JWT 토큰)을 딱 붙여서 보내."
                                 .contentType(MediaType.APPLICATION_JSON) // 4. "내가 보낼 데이터의 포맷은 JSON 형식이야."
                                 .content(requestBody) // 5. "그리고 아까 위(given)에서 만들어둔 JSON 문자열(닉네임, 위도, 경도)을 편지 봉투(Body) 안에 쏙 넣어."
@@ -122,7 +125,7 @@ class UserIntegrationTest {
 
         // when (실행)
         // MockMvc로 PATCH 요청을 보냅니다.
-        mockMvc.perform(patch("/api/users/location") // POST가 아니라 PATCH입니다!
+        mockMvc.perform(patch("/location") // POST가 아니라 PATCH입니다!
                         .header("Authorization", "Bearer " + realJwtToken) // 진짜 토큰 장착
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(locationUpdateJson))
@@ -156,7 +159,7 @@ class UserIntegrationTest {
 
         // when (실행) & then (검증)
         // GET 방식은 보낼 데이터(Body)가 없으므로 아주 심플합니다.
-        mockMvc.perform(get("/api/users/me") // GET 요청!
+        mockMvc.perform(get("/users/me") // GET 요청!
                         .header("Authorization", "Bearer " + realJwtToken)) // 토큰만 달랑 들고 갑니다.
                 .andExpect(status().isOk()) // 1. 통신이 200 OK로 성공했는가?
                 // 2. 날아온 JSON 응답 데이터($.필드명)가 내가 방금 넣은 값과 일치하는가?
@@ -242,7 +245,7 @@ class UserIntegrationTest {
 
         // when (실행) & then (검증)
         // GET 방식은 보낼 데이터(Body)가 없으므로 아주 심플합니다.
-        mockMvc.perform(get("/api/users/me/location") // GET 요청!
+        mockMvc.perform(get("/users/location") // GET 요청!
                         .header("Authorization", "Bearer " + realJwtToken)) // 토큰만 달랑 들고 갑니다.
                 .andExpect(status().isOk()) // 1. 통신이 200 OK로 성공했는가?
                 // 2. 날아온 JSON 응답 데이터($.필드명)가 내가 방금 넣은 값과 일치하는가?
@@ -258,9 +261,61 @@ class UserIntegrationTest {
         // 의도적으로 유저를 DB에 저장하지 않습니다. (유저가 존재하지 않음)
 
         // when (실행) & then (검증)
-        // 존재하지 않는 유저의 위치 조회 요청
-        mockMvc.perform(get("/api/users/me/location") // GET 요청!
+        // 존재하지 않는 유저 → RuntimeException 발생 → Spring 기본 동작으로 500 반환
+        mockMvc.perform(get("/users/location")
                         .header("Authorization", "Bearer " + realJwtToken))
-                .andExpect(status().isBadRequest()); // 500 에러 (가입되지 않은 유저)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("전체 유저 목록 조회 통합 테스트: GET 요청 시 유저 목록 배열을 정상적으로 반환해야 한다.")
+    void getAllUsersIntegrationTest() throws Exception {
+        // given (준비)
+        // 테스트용 유저를 Firestore에 미리 저장합니다.
+        UserEntity initialUser = UserEntity.builder()
+                .userId(testUid)
+                .nickName("전체조회테스터")
+                .gmail("test@example.com")
+                .point(1000)
+                .acceptCount(0)
+                .build();
+        userRepository.save(testUid, initialUser);
+
+        // when (실행) & then (검증)
+        mockMvc.perform(get("/users")
+                        .header("Authorization", "Bearer " + realJwtToken))
+                .andExpect(status().isOk())
+                // 응답이 JSON 배열인지, 최소 1개 이상의 원소를 포함하는지 확인
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(greaterThanOrEqualTo(1)));
+    }
+
+    @Test
+    @DisplayName("전체 유저 위치 정보 조회 통합 테스트: GET 요청 시 유저 위치 목록 배열을 정상적으로 반환해야 한다.")
+    void getAllUsersLocationIntegrationTest() throws Exception {
+        // given (준비)
+        // 위치 정보가 있는 테스트용 유저를 Firestore에 미리 저장합니다.
+        UserEntity initialUser = UserEntity.builder()
+                .userId(testUid)
+                .nickName("위치전체조회테스터")
+                .gmail("test@example.com")
+                .point(1000)
+                .acceptCount(0)
+                .latitude(37.5665)
+                .longitude(126.9780)
+                .build();
+        userRepository.save(testUid, initialUser);
+
+        // when (실행) & then (검증)
+        mockMvc.perform(get("/users/locations")
+                        .header("Authorization", "Bearer " + realJwtToken))
+                .andExpect(status().isOk())
+                // 응답이 JSON 배열인지 확인
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(greaterThanOrEqualTo(1)))
+                // uid, latitude, longitude 필드가 존재하는지 확인
+                .andExpect(jsonPath("$[0].uid").exists())
+                .andExpect(jsonPath("$[0].latitude").exists())
+                .andExpect(jsonPath("$[0].longitude").exists());
     }
 }
