@@ -26,7 +26,7 @@ public class PostResDto {
                 .title(entity.getTitle())
                 .content(entity.getContent())
                 .createdAt(entity.getIsCreated() != null ? entity.getIsCreated().toDate().getTime() : 0L)
-                .isAccept(entity.isAccept())
+                .isAccept(entity.isAccepted())
                 .accepted_userId(entity.getAccepted_userId())
                 .latitude(entity.getLatitude())
                 .longitude(entity.getLongitude())

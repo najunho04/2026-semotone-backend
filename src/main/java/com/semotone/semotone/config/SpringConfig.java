@@ -1,6 +1,10 @@
 package com.semotone.semotone.config;
 
 import com.google.cloud.firestore.Firestore;
+import com.semotone.semotone.domain.ai.repository.AiRepositoryImpl;
+import com.semotone.semotone.domain.ai.repository.aiRepository;
+import com.semotone.semotone.domain.ai.service.AiService;
+import com.semotone.semotone.domain.ai.service.AiServiceImpl;
 import com.semotone.semotone.domain.post.controller.PostController;
 import com.semotone.semotone.domain.post.repository.PostRepository;
 import com.semotone.semotone.domain.post.repository.PostRepositoryImpl;
@@ -11,6 +15,7 @@ import com.semotone.semotone.domain.user.repository.UserRepository;
 import com.semotone.semotone.domain.user.repository.UserRepositoryImpl;
 import com.semotone.semotone.domain.user.service.UserService;
 import com.semotone.semotone.domain.user.service.UserServiceImpl;
+import com.semotone.semotone.util.GeminiClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,13 +49,30 @@ public class SpringConfig {
     }
 
     @Bean
-    public PostService postService(PostRepository postRepository, UserService userService){
-        return new PostServiceImpl(postRepository, userService);
+    public GeminiClient geminiClient() {
+        // 실제 API 키를 발급받은 후 "INPUT-GEMINI-API-KEY"를 교체하세요
+        String apiKey = "INPUT-GEMINI-API-KEY";
+        return new GeminiClient(apiKey);
     }
 
     @Bean
-    public PostController postController(PostService postService){
-        return new PostController(postService);
+    public aiRepository aiRepository(Firestore firestore) {
+        return new AiRepositoryImpl(firestore);
+    }
+
+    @Bean
+    public AiService aiService(aiRepository aiRepository, PostRepository postRepository, GeminiClient geminiClient) {
+        return new AiServiceImpl(aiRepository, postRepository, geminiClient);
+    }
+
+    @Bean
+    public PostService postService(PostRepository postRepository, UserService userService, AiService aiService){
+        return new PostServiceImpl(postRepository, userService, aiService);
+    }
+
+    @Bean
+    public PostController postController(PostService postService, AiService aiService){
+        return new PostController(postService, aiService);
     }
 
 }

@@ -36,7 +36,7 @@ public class UserController {
 
     // PATCH http://localhost:8080/api/users/location
     // 위치 정보 동기화
-    @PatchMapping("/location")
+    @PatchMapping("/users/location")
     public ResponseEntity<Void> updateLocation(
             @RequestBody UserLocationUpdateReqDto dto,
             Authentication authentication // JwtFilter가 검증해둔 토큰 정보
@@ -66,19 +66,19 @@ public class UserController {
     }
 
     // GET http://localhost:8080/users/{userId}
-    @GetMapping("/users/{userId}")
+    @GetMapping("/users/{user_id}")
     public ResponseEntity<UserResDto> getUserProfile(
             Authentication authentication,
-            @PathVariable String userId
+            @PathVariable String user_id
     ){
         // 2. Service에게 내 UID를 주고 프로필(DTO)을 받아옵니다.
-        UserResDto response = userService.getUserProfile(userId);
+        UserResDto response = userService.getUserProfile(user_id);
 
         // 3. 200 OK 상태 코드와 함께 JSON 데이터로 응답합니다.
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/location")
+    @GetMapping("/users/me/location")
     public ResponseEntity<UserLocationResDto> getMyLocation(Authentication authentication){
         String uid = (String) authentication.getPrincipal();
         UserLocationResDto response = userService.getMyLocation(uid);
@@ -88,14 +88,14 @@ public class UserController {
     // GET http://localhost:8080/users
     // 전체 유저 목록 조회
     @GetMapping("/users")
-    public ResponseEntity<List<UserResDto>> getAllUsers() {
+    public ResponseEntity<List<UserResDto>> getAllUsers(Authentication authentication) {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     // GET http://localhost:8080/users/locations
     // 전체 유저 위치 정보 조회
-    @GetMapping("/users/locations")
-    public ResponseEntity<List<UserLocationResDto>> getAllUsersLocation() {
+    @GetMapping("/users/all/location")
+    public ResponseEntity<List<UserLocationResDto>> getAllUsersLocation(Authentication authentication) {
         return ResponseEntity.ok(userService.getAllUsersLocation());
     }
 }

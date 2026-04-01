@@ -13,4 +13,6 @@ public class UserCreateReqDto {
     private String nickName;
     private double latitude;
     private double longitude;
+    private String school;
+    private String major;
 }

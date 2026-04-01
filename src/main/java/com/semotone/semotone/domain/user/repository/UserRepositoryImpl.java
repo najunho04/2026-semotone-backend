@@ -126,6 +126,20 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void removePostIdFromUser(String uid, String postId) {
+        try {
+            // ★ FieldValue.arrayRemove(): 배열에서 특정 값을 제거 (동시성 문제 완벽 방지)
+            // AI 분석 실패 시 저장된 postId를 myPosts 배열에서 제거합니다.
+            getDb().collection(COLLECTION_NAME).document(uid)
+                    .update("myPosts", FieldValue.arrayRemove(postId)).get();
+            log.info("Firestore: 유저 작성글 목록 제거 완료 [UID: {}, PostID: {}]", uid, postId);
+        } catch (Exception e) {
+            log.error("Firestore 유저 작성글 목록 제거 실패", e);
+            throw new RuntimeException("DB 업데이트 중 오류가 발생했습니다.");
+        }
+    }
+
+    @Override
     public void updateLocation(String uid, double latitude, double longitude) {
         try {
             // 수정할 필드만 Map에 담습니다.

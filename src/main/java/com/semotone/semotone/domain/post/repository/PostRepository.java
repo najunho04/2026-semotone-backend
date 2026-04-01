@@ -32,4 +32,10 @@ public interface PostRepository {
      */
     List<QueryDocumentSnapshot> findAllUnaccepted() throws ExecutionException, InterruptedException;
 
+    /**
+     * 게시글 삭제 (롤백용)
+     * - AI 분석 실패 시 저장된 게시글을 삭제하기 위해 사용
+     */
+    void delete(String postId) throws ExecutionException, InterruptedException;
+
 }

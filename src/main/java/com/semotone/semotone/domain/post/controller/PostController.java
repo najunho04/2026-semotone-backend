@@ -1,5 +1,7 @@
 package com.semotone.semotone.domain.post.controller;
 
+import com.semotone.semotone.domain.ai.dto.AiResultResDto;
+import com.semotone.semotone.domain.ai.service.AiService;
 import com.semotone.semotone.domain.post.dto.PostAcceptReqDto;
 import com.semotone.semotone.domain.post.dto.PostCreateReqDto;
 import com.semotone.semotone.domain.post.dto.PostResDto;
@@ -13,14 +15,15 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 @RequiredArgsConstructor
 
 public class PostController {
     private final PostService postService;
+    private final AiService aiService;
 
     //게시글 생성
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<String> createPost(@RequestBody PostCreateReqDto reqDto) {
         try {
             // Service에 처리를 맡기고 생성된 ID를 받아옴
@@ -31,7 +34,7 @@ public class PostController {
         }
     }
     //게시글 목록 조회
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<?> getPostList(
             @RequestParam double lat,
             @RequestParam double lng,
@@ -59,6 +62,22 @@ public class PostController {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    }
+
+    // AI 분석 결과 조회 (게시물 상세 조회와 독립적으로 호출)
+    // AI 분석이 아직 완료되지 않은 경우 빈 객체({}) 반환 → 클라이언트가 필요 시 재요청 가능
+    @GetMapping("/{postId}/ai")
+    public ResponseEntity<?> getAiResult(@PathVariable String postId) {
+        try {
+            AiResultResDto aiResult = aiService.getAiResult(postId);
+            if (aiResult == null) {
+                // AI 분석 결과 미존재 → 빈 객체 반환 (200 OK, 서버 에러 아님)
+                return ResponseEntity.ok(AiResultResDto.builder().build());
+            }
+            return ResponseEntity.ok(aiResult);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("AI 결과 조회 실패: " + e.getMessage());
+        }
     }
 
     @PostMapping("/{postId}/accept")
