@@ -5,6 +5,8 @@ import com.semotone.semotone.domain.user.dto.UserLocationResDto;
 import com.semotone.semotone.domain.user.dto.UserLocationUpdateReqDto;
 import com.semotone.semotone.domain.user.dto.UserResDto;
 
+import java.util.List;
+
 public interface UserService {
     /**
      * 1. 회원가입 처리
@@ -48,4 +50,14 @@ public interface UserService {
     void addPostIdToUser(String uid, String postId);
 
     UserLocationResDto getMyLocation(String uid);
+
+    /**
+     * 7. 전체 유저 목록 조회
+     */
+    List<UserResDto> getAllUsers();
+
+    /**
+     * 8. 전체 유저 위치 정보 조회
+     */
+    List<UserLocationResDto> getAllUsersLocation();
 }

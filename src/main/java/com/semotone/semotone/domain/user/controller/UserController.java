@@ -80,13 +80,22 @@ public class UserController {
 
     @GetMapping("/users/location")
     public ResponseEntity<UserLocationResDto> getMyLocation(Authentication authentication){
-        // 1. 토큰 보관함에서 내 고유 UID를 꺼냅니다. (안전함 보장)
         String uid = (String) authentication.getPrincipal();
-
-        // 2. Service에게 내 UID를 주고 위치(DTO)를 받아옵니다.
         UserLocationResDto response = userService.getMyLocation(uid);
-
-        // 3. 200 OK 상태 코드와 함께 JSON 데이터로 응답합니다.
         return ResponseEntity.ok(response);
+    }
+
+    // GET http://localhost:8080/users
+    // 전체 유저 목록 조회
+    @GetMapping("/users")
+    public ResponseEntity<List<UserResDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    // GET http://localhost:8080/users/locations
+    // 전체 유저 위치 정보 조회
+    @GetMapping("/users/locations")
+    public ResponseEntity<List<UserLocationResDto>> getAllUsersLocation() {
+        return ResponseEntity.ok(userService.getAllUsersLocation());
     }
 }

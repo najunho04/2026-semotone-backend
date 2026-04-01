@@ -8,7 +8,12 @@ import com.semotone.semotone.domain.user.dto.UserResDto;
 import com.semotone.semotone.domain.user.entity.UserEntity;
 import com.semotone.semotone.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -109,11 +114,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserLocationResDto getMyLocation(String uid) {
-        // 1. DB에서 UID로 유저 문서를 찾아옵니다. (없으면 에러 발생!)
         UserEntity userEntity = userRepository.findById(uid)
-                .orElseThrow(() -> new RuntimeException("가입된 유저 정보를 찾을 수 없습니다."));
+                // RuntimeException 대신 ResponseStatusException 사용 (404 상태 코드 지정)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "가입된 유저 정보를 찾을 수 없습니다."));
 
-        // 2. 찾아온 Entity의 정보를 쏙쏙 뽑아서 클라이언트에게 보낼 DTO 박스에 담아줍니다.
         return UserLocationResDto.builder()
                 .uid(uid)
                 .latitude(userEntity.getLatitude())
@@ -121,5 +125,27 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public List<UserResDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> UserResDto.builder()
+                        .uid(user.getUserId())
+                        .nickName(user.getNickName())
+                        .gmail(user.getGmail())
+                        .point(user.getPoint())
+                        .acceptCount(user.getAcceptCount())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
+    @Override
+    public List<UserLocationResDto> getAllUsersLocation() {
+        return userRepository.findAll().stream()
+                .map(user -> UserLocationResDto.builder()
+                        .uid(user.getUserId())
+                        .latitude(user.getLatitude())
+                        .longitude(user.getLongitude())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
