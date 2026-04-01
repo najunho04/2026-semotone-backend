@@ -1,26 +1,36 @@
 package com.semotone.semotone;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.semotone.semotone.domain.post.controller.PostController;
+import com.semotone.semotone.config.TestConfig;
 import com.semotone.semotone.domain.post.dto.PostCreateReqDto;
-import com.semotone.semotone.domain.post.service.PostService;
+import com.semotone.semotone.domain.post.entity.PostEntity;
+import com.semotone.semotone.domain.post.repository.PostRepository;
+import com.semotone.semotone.domain.user.entity.UserEntity;
+import com.semotone.semotone.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// @SpringBootTest 대신 컨트롤러(API)만 가볍게 테스트하는 어노테이션 사용
-@WebMvcTest(controllers = PostController.class)
-@AutoConfigureMockMvc(addFilters = false) // 시큐리티 인증 무시
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
+@Import(TestConfig.class)
 class PostControllerTest {
 
     @Autowired
@@ -29,32 +39,66 @@ class PostControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // 핵심: 실제 Firebase DB와 연결되는 Service 대신 '가짜(Mock)' Service를 주입
-    @MockitoBean
-    private PostService postService;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    private final List<String> createdPostIds = new ArrayList<>();
+    private String testUserId;
+
+    @BeforeEach
+    void setUp() {
+        testUserId = "post-controller-user-" + UUID.randomUUID();
+        userRepository.save(testUserId, UserEntity.builder()
+                .userId(testUserId)
+                .nickName("controller-user")
+                .gmail(testUserId + "@test.com")
+                .point(1000)
+                .acceptCount(0)
+                .latitude(37.5665)
+                .longitude(126.9780)
+                .build());
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        for (String postId : createdPostIds) {
+            postRepository.delete(postId);
+        }
+        if (testUserId != null) {
+            userRepository.getDb().collection("users").document(testUserId).delete().get();
+        }
+    }
 
     @Test
-    @DisplayName("게시글 생성 API가 정상 작동하는지 테스트")
+    @DisplayName("게시글 생성 API는 실제 서비스와 Firestore를 통해 저장된다")
     void createPostTest() throws Exception {
-        // 1. 클라이언트가 보낼 데이터(DTO) 세팅
         PostCreateReqDto reqDto = new PostCreateReqDto();
-        reqDto.setUserId("testUser_999");
-        reqDto.setTitle("테스트 코드로 작성한 글");
-        reqDto.setContent("포스트맨 없이 테스트 코드로 실행했습니다!");
+        reqDto.setUserId(testUserId);
+        reqDto.setTitle("테스트 제목");
+        reqDto.setContent("테스트 본문");
+        reqDto.setRewardPoint(100);
         reqDto.setLatitude(37.5665);
         reqDto.setLongitude(126.9780);
 
-        // 💡 가짜 Service가 동작할 행동을 미리 설정 (에러 방지용)
-        Mockito.when(postService.createPost(any(PostCreateReqDto.class)))
-                .thenReturn("가짜_문서_ID_12345");
-
-        // 2. DTO 객체를 JSON 형태의 문자열로 변환
-        String jsonBody = objectMapper.writeValueAsString(reqDto);
-
-        // 3. MockMvc를 사용해 /api/posts 주소로 POST 요청 날리기
-        mockMvc.perform(post("/api/posts")
+        String response = mockMvc.perform(post("/posts/create")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody))
-                .andExpect(status().isOk()); // 응답 상태 코드가 200(OK)인지 확인
+                        .content(objectMapper.writeValueAsString(reqDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("게시글 생성 성공! 문서 ID: ")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String postId = response.split("문서 ID: ")[1];
+        createdPostIds.add(postId);
+
+        PostEntity savedPost = postRepository.findById(postId);
+        assertThat(savedPost).isNotNull();
+        assertThat(savedPost.getRewardPoint()).isEqualTo(100);
+        assertThat(savedPost.getUserId()).isEqualTo(testUserId);
+        assertThat(userRepository.findById(testUserId).orElseThrow().getPoint()).isEqualTo(900);
     }
 }
