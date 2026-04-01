@@ -49,6 +49,12 @@ public interface UserService {
      */
     void addPostIdToUser(String uid, String postId);
 
+    /**
+     * 6-1. 유저의 작성 게시글 목록에서 게시글 ID 제거 (롤백용)
+     * - AI 분석 실패 시 저장된 postId를 제거하기 위해 사용됩니다.
+     */
+    void removePostIdFromUser(String uid, String postId);
+
     UserLocationResDto getMyLocation(String uid);
 
     /**

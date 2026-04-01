@@ -12,5 +12,7 @@ public class UserResDto {
     private String gmail;
     private int point;
     private int acceptCount;
+    private String school;
+    private String major;
     // myPosts 리스트나 currentLocation 등 필요한 정보만 선택적으로 담아 응답
 }

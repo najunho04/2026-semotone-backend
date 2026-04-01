@@ -37,9 +37,14 @@ public interface UserRepository {
     /**
      * 5. 작성한 게시글 ID 추가 (배열 업데이트)
      * - 유저가 새로운 게시글을 작성했을 때, User 문서 안의 myPosts 배열에 새로운 postId를 밀어 넣습니다.
-     * -> ** post 로직과 엮여야 해서 아직 미개발
      */
     void addPostIdToUser(String uid, String postId);
+
+    /**
+     * 5-1. 작성한 게시글 ID 제거 (배열 업데이트, 롤백용)
+     * - AI 분석 실패 시 저장된 postId를 User 문서의 myPosts 배열에서 제거합니다.
+     */
+    void removePostIdFromUser(String uid, String postId);
 
     /**
      * 6. 클라이언트 위치 정보 최신화

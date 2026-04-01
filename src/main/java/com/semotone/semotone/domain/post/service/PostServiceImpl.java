@@ -1,8 +1,10 @@
 package com.semotone.semotone.domain.post.service;
 
 import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.GeoPoint;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.semotone.semotone.domain.ai.dto.AiReqDto;
+import com.semotone.semotone.domain.ai.dto.AiResDto;
+import com.semotone.semotone.domain.ai.service.AiService;
 import com.semotone.semotone.domain.post.dto.PostCreateReqDto;
 import com.semotone.semotone.domain.post.dto.PostResDto;
 import com.semotone.semotone.domain.post.entity.PostEntity;
@@ -21,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserService userService;
+    private final AiService aiService;
 
     @Override
     public String createPost(PostCreateReqDto reqDto) throws ExecutionException, InterruptedException {
@@ -32,18 +35,45 @@ public class PostServiceImpl implements PostService {
                 .latitude(reqDto.getLatitude())
                 .longitude(reqDto.getLongitude())
                 .isCreated(Timestamp.now()) // 현재 시간을 작성 시간으로 세팅
-                .isDelete(false)            // 처음 생성 시 삭제 여부는 false
-                .isAccept(false)            // 처음 생성 시 수락 여부는 false
+                .deleted(false)            // 처음 생성 시 삭제 여부는 false
+                .accepted(false)            // 처음 생성 시 수락 여부는 false
                 .accepted_userId(null)       // 수락자가 없으므로 null
                 .build();
 
-        // 게시글 저장 후 반환된 ID를 사용
+        // 1️⃣ 게시글 저장
         String postId = postRepository.save(post);
 
-        // 유저의 myPosts 리스트에 postId 추가
-        userService.addPostIdToUser(reqDto.getUserId(), postId);
+        try {
+            // 2️⃣ 유저의 myPosts 리스트에 postId 추가
+            userService.addPostIdToUser(reqDto.getUserId(), postId);
 
-        return postId;
+            // 3️⃣ AI 분석 요청 (동기 방식: AI 분석 완료까지 대기)
+            // 비동기 전환 시: @Async 사용 또는 메시지 큐(RabbitMQ, Kafka)를 통해 백그라운드 처리 가능
+            AiReqDto aiReqDto = AiReqDto.builder().text(reqDto.getContent()).build();
+            AiResDto aiResDto = aiService.analyzePostText(aiReqDto);
+            aiService.saveAiResult(postId, aiResDto);
+
+            return postId;
+
+        } catch (Exception e) {
+            // 🔄 롤백 (방안 2): AI 분석 실패 시 저장된 게시글과 myPosts 데이터 제거
+            try {
+                postRepository.delete(postId);
+                userService.removePostIdFromUser(reqDto.getUserId(), postId);
+            } catch (Exception rollbackException) {
+                // 롤백 중 실패 시 로그 기록 (중복 삭제 등의 경우)
+                throw new RuntimeException(
+                    "게시글 생성 중 AI 분석 실패 및 롤백도 실패했습니다. postId=" + postId +
+                    " [원인: " + e.getMessage() + "] [롤백 실패: " + rollbackException.getMessage() + "]",
+                    e
+                );
+            }
+
+            throw new RuntimeException(
+                "게시글 생성 중 AI 분석 실패 및 모든 변경사항이 롤백되었습니다: " + e.getMessage(),
+                e
+            );
+        }
     }
 
     @Override

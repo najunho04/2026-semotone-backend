@@ -35,8 +35,10 @@ public class UserServiceImpl implements UserService {
                 .gmail(email)          // 토큰에서 뽑은 진짜 이메일
                 .point(1000)           // ★ 신규 가입 보너스 1000 포인트!
                 .acceptCount(0)        // 초기 수락 횟수는 0
-                // .latitude(dto.getLatitude()) // 나중에 엔티티에 위치 필드 추가하셨다면 주석 해제!
-                // .longitude(dto.getLongitude())
+                .latitude(dto.getLatitude()) // 나중에 엔티티에 위치 필드 추가하셨다면 주석 해제!
+                .longitude(dto.getLongitude())
+                .major(dto.getMajor())
+                .school(dto.getSchool())
                 .build();
 
         // 3. 조립된 Entity를 DB에 저장
@@ -49,6 +51,8 @@ public class UserServiceImpl implements UserService {
                 .gmail(userEntity.getGmail())
                 .point(userEntity.getPoint())
                 .acceptCount(userEntity.getAcceptCount())
+                .major(dto.getMajor())
+                .school(dto.getSchool())
                 .build();
     }
 
@@ -69,6 +73,8 @@ public class UserServiceImpl implements UserService {
                 // 만약 프론트에서 내 위치 정보나 게시글 목록도 필요하다고 하면 여기서 추가로 담아주면 됩니다!
                 // .latitude(userEntity.getLatitude())
                 // .longitude(userEntity.getLongitude())
+                .major(userEntity.getMajor())
+                .school(userEntity.getSchool())
                 .build();
     }
 
@@ -88,6 +94,8 @@ public class UserServiceImpl implements UserService {
                 // 만약 프론트에서 내 위치 정보나 게시글 목록도 필요하다고 하면 여기서 추가로 담아주면 됩니다!
                 // .latitude(userEntity.getLatitude())
                 // .longitude(userEntity.getLongitude())
+                .major(userEntity.getMajor())
+                .school(userEntity.getSchool())
                 .build();
     }
 
@@ -113,6 +121,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void removePostIdFromUser(String uid, String postId) {
+        // AI 분석 실패 시 저장된 postId를 롤백하기 위해 배열에서 제거합니다.
+        userRepository.removePostIdFromUser(uid, postId);
+    }
+
+    @Override
     public UserLocationResDto getMyLocation(String uid) {
         UserEntity userEntity = userRepository.findById(uid)
                 // RuntimeException 대신 ResponseStatusException 사용 (404 상태 코드 지정)
@@ -134,6 +148,8 @@ public class UserServiceImpl implements UserService {
                         .gmail(user.getGmail())
                         .point(user.getPoint())
                         .acceptCount(user.getAcceptCount())
+                        .major(user.getMajor())
+                        .school(user.getSchool())
                         .build())
                 .collect(Collectors.toList());
     }

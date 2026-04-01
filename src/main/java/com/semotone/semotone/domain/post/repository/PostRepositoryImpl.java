@@ -31,13 +31,13 @@ public class PostRepositoryImpl implements PostRepository {
             DocumentSnapshot snapshot = transaction.get(docRef).get();
 
             // 이미 수락된 게시글이면 false 반환
-            Boolean isAccept = snapshot.getBoolean("isAccept");
+            Boolean isAccept = snapshot.getBoolean("accepted");
             if (Boolean.TRUE.equals(isAccept)) {
                 return false;
             }
 
             // 수락 처리 (트랜잭션 내에서 원자적으로 업데이트)
-            transaction.update(docRef, "isAccept", true, "accepted_userId", acceptingUserId);
+            transaction.update(docRef, "accepted", true, "accepted_userId", acceptingUserId);
             return true;
         }).get();
     }
@@ -56,9 +56,15 @@ public class PostRepositoryImpl implements PostRepository {
     //수락이 아직 안된, 삭제가 아직 안된 게시글 목록 조회
     public List<QueryDocumentSnapshot> findAllUnaccepted() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> future = firestore.collection(collection_name)
-                .whereEqualTo("isAccept", false) // 수락 안 된 것만
-                .whereEqualTo("isDelete", false) // 삭제 안 된 것만
+                .whereEqualTo("accepted", false) // 수락 안 된 것만
+                .whereEqualTo("deleted", false) // 삭제 안 된 것만
                 .get();
         return future.get().getDocuments();
+    }
+
+    @Override
+    // 게시글 삭제 (AI 분석 실패 시 롤백용)
+    public void delete(String postId) throws ExecutionException, InterruptedException {
+        firestore.collection(collection_name).document(postId).delete().get();
     }
 }
