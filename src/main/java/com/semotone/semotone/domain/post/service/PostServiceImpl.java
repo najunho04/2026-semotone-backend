@@ -27,7 +27,6 @@ public class PostServiceImpl implements PostService {
     @Override
     public String createPost(PostCreateReqDto reqDto) throws ExecutionException, InterruptedException {
         validateRewardPoint(reqDto.getRewardPoint());
-        userService.usePoints(reqDto.getUserId(), reqDto.getRewardPoint());
 
         PostEntity post = PostEntity.builder()
                 .userId(reqDto.getUserId())
@@ -46,8 +45,13 @@ public class PostServiceImpl implements PostService {
         String postId = postRepository.save(post);
 
         try {
+            // 게시물 작성 시 유저 포인트 감소
+            userService.usePoints(reqDto.getUserId(), reqDto.getRewardPoint());
+
+            // 유저 DB에 postId 추가
             userService.addPostIdToUser(reqDto.getUserId(), postId);
 
+            // AI api 호출 및 DB 저장
             AiReqDto aiReqDto = AiReqDto.builder().text(reqDto.getContent()).build();
             AiResDto aiResDto = aiService.analyzePostText(aiReqDto);
             aiService.saveAiResult(postId, aiResDto);
@@ -89,7 +93,10 @@ public class PostServiceImpl implements PostService {
             throw new RuntimeException("수락된 사용자가 없어 완료 처리할 수 없습니다.");
         }
 
+        //post DB에 completed, deleted = True
         int rewardPoint = postRepository.completePost(postId, requesterUserId);
+
+        //accepted_user 에게 포인트 지급
         userService.increasePointAndAcceptCount(post.getAccepted_userId(), rewardPoint, 1);
     }
 

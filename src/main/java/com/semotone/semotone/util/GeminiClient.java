@@ -15,7 +15,7 @@ import java.util.Map;
 public class GeminiClient {
 
     private static final String GEMINI_API_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=";
 
     private final String apiKey;
     private final RestTemplate restTemplate;
@@ -61,6 +61,7 @@ public class GeminiClient {
      * JSON 구조: { "contents": [{ "parts": [{ "text": "..." }] }] }
      */
     private Map<String, Object> buildRequestBody(String text) {
+
         Map<String, Object> part = new HashMap<>();
         part.put("text", buildPrompt(text));
 
