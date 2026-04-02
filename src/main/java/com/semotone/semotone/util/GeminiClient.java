@@ -80,15 +80,17 @@ public class GeminiClient {
      */
     private String buildPrompt(String text) {
         return """
-                다음 심부름 게시글을 분석해서 아래 JSON 형식으로만 응답해줘. JSON 외에 다른 텍스트나 코드 블록은 포함하지 마.
+                너는 대학생 심부름 요청을 분석하는 AI다.
+
+                반드시 JSON으로만 응답해라. 설명하지 마라.
 
                 게시글: "%s"
 
                 응답 형식:
                 {
-                  "category": "배달|구매|정보|기타 중 하나",
+                  "category": "배달|대여|심부름|기타 중 하나",
                   "object": "물건명 또는 null",
-                  "type": "물건전달|음식배달|정보수집|기타 중 하나",
+                  "type": "물건전달|대여|심부름|기타 중 하나",
                   "urgency": "낮음|보통|높음 중 하나",
                   "fromLocation": "출발지 키워드 또는 null",
                   "toLocation": "도착지 키워드 또는 null",
@@ -99,6 +101,15 @@ public class GeminiClient {
                     "urgency": "위와 동일한 값"
                   }
                 }
+
+                규칙:
+                - "~해주실분", "~빌려주실분", "~가능하신분"은 행동 요청이다
+                - 물건 빌려달라 → category=대여
+                - 물건 전달 요청 → category=배달
+                - 단순 질문만 있을 경우 → category=기타
+                - 최대한 추론해서 null 최소화
+
+                JSON만 출력해라
                 """.formatted(text);
     }
 
