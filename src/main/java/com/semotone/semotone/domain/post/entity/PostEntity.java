@@ -17,14 +17,15 @@ public class PostEntity {
 
     @DocumentId
     private String id;
-    private String userId; // 작성자 UID
+    private String userId;
     private String title;
     private String content;
-    private Timestamp isCreated; // Firestore 전용 타임스탬프
+    private int rewardPoint;
+    private Timestamp isCreated;
     private boolean deleted;
     private boolean accepted;
-
-    private String accepted_userId; // 수락한 유저의 UID (초기엔 null)
+    private boolean completed;
+    private String accepted_userId;
     private double latitude;
     private double longitude;
 }

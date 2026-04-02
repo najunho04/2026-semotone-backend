@@ -20,6 +20,8 @@ public interface PostRepository {
      */
     boolean tryAcceptPost(String postId, String acceptingUserId) throws ExecutionException, InterruptedException;
 
+    int completePost(String postId, String requesterUserId) throws ExecutionException, InterruptedException;
+
     /**
      * 게시글 조회
      * @return PostEntity
@@ -35,7 +37,5 @@ public interface PostRepository {
     /**
      * 게시글 삭제 (롤백용)
      * - AI 분석 실패 시 저장된 게시글을 삭제하기 위해 사용
-     */
-    void delete(String postId) throws ExecutionException, InterruptedException;
-
+     */void delete(String postId) throws ExecutionException, InterruptedException;
 }
