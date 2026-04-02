@@ -89,7 +89,9 @@ public class PostServiceImpl implements PostService {
             throw new RuntimeException("수락된 사용자가 없어 완료 처리할 수 없습니다.");
         }
 
+        //post DB에 completed, deleted = True
         int rewardPoint = postRepository.completePost(postId, requesterUserId);
+        //accepted_user 에게 포인트 지급
         userService.increasePointAndAcceptCount(post.getAccepted_userId(), rewardPoint, 1);
     }
 
