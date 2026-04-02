@@ -25,10 +25,13 @@ public interface UserRepository {
     // (게시물 작성 시) myPosts에 postId 추가
     void addPostIdToUser(String uid, String postId);
 
+    // (AI Res 에러 시 롤백 로직) 유저 DB에서 postId 삭제
     void removePostIdFromUser(String uid, String postId);
 
+    // 유저 위치정보 동기화
     void updateLocation(String uid, double latitude, double longitude);
 
+    // 유저 전체 조회
     List<UserEntity> findAll();
 
     Firestore getDb();

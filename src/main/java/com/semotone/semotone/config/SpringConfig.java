@@ -16,11 +16,15 @@ import com.semotone.semotone.domain.user.repository.UserRepositoryImpl;
 import com.semotone.semotone.domain.user.service.UserService;
 import com.semotone.semotone.domain.user.service.UserServiceImpl;
 import com.semotone.semotone.util.GeminiClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SpringConfig {
+
+    @Value("${gemini.api.key:INPUT-GEMINI-API-KEY}")
+    private String geminiApiKey;
 
     // 1. 파라미터로 Firestore를 받습니다.
     // 스프링이 FirebaseConfig에서 생성된 Firestore 빈을 알아서 주입해 줍니다!
@@ -50,9 +54,7 @@ public class SpringConfig {
 
     @Bean
     public GeminiClient geminiClient() {
-        // 실제 API 키를 발급받은 후 "INPUT-GEMINI-API-KEY"를 교체하세요
-        String apiKey = "INPUT-GEMINI-API-KEY";
-        return new GeminiClient(apiKey);
+        return new GeminiClient(geminiApiKey);
     }
 
     @Bean

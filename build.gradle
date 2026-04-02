@@ -32,6 +32,9 @@ dependencies {
 	// Firestore 및 Firebase Auth를 제어하기 위한 Admin SDK
 	implementation 'com.google.firebase:firebase-admin:9.2.0' // 최신 버전
 
+	// .env 파일 환경변수 로드
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
