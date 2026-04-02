@@ -1,5 +1,5 @@
-# JDK 21 이미지 사용 (본인 버전에 맞게 수정)
-FROM openjdk:21-jdk-slim
+# 기존의 openjdk 대신 eclipse-temurin 21 버전 사용
+FROM eclipse-temurin:21-jdk-jammy
 
 # 작업 디렉토리 설정
 WORKDIR /app
