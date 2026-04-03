@@ -4,6 +4,7 @@ import com.semotone.semotone.domain.ai.dto.AiReqDto;
 import com.semotone.semotone.domain.ai.dto.AiResDto;
 import com.semotone.semotone.domain.ai.entity.AiResultEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface aiRepository {
@@ -21,4 +22,11 @@ public interface aiRepository {
      * - AI 분석이 실패했거나 아직 완료되지 않아서 데이터가 없을 수도 있으므로 Optional로 감싸줍니다.
      */
     Optional<AiResultEntity> findByPostId(String postId);
+
+    /**
+     * 3. 게시글 매핑되는 ai_result 전체 조회
+     * - 태그, 응급도에 따른 필터링 기능 구현에 사용됩니다.
+     *
+     */
+    List<AiResultEntity> findAllAiResult();
 }
