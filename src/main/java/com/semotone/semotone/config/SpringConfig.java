@@ -1,10 +1,16 @@
 package com.semotone.semotone.config;
 
 import com.google.cloud.firestore.Firestore;
+import com.semotone.semotone.domain.ai.controller.AiController;
 import com.semotone.semotone.domain.ai.repository.AiRepositoryImpl;
 import com.semotone.semotone.domain.ai.repository.aiRepository;
 import com.semotone.semotone.domain.ai.service.AiService;
 import com.semotone.semotone.domain.ai.service.AiServiceImpl;
+import com.semotone.semotone.domain.chat.controller.ChatRoomController;
+import com.semotone.semotone.domain.chat.repository.ChatRoomRepository;
+import com.semotone.semotone.domain.chat.repository.ChatRoomRepositoryImpl;
+import com.semotone.semotone.domain.chat.service.ChatRoomService;
+import com.semotone.semotone.domain.chat.service.ChatRoomServiceImpl;
 import com.semotone.semotone.domain.post.controller.PostController;
 import com.semotone.semotone.domain.post.repository.PostRepository;
 import com.semotone.semotone.domain.post.repository.PostRepositoryImpl;
@@ -75,6 +81,26 @@ public class SpringConfig {
     @Bean
     public PostController postController(PostService postService, AiService aiService){
         return new PostController(postService, aiService);
+    }
+
+    @Bean
+    public AiController aiController(AiService aiService){
+        return new AiController(aiService);
+    }
+
+    @Bean
+    public ChatRoomRepository chatRoomRepository(Firestore firestore){
+        return new ChatRoomRepositoryImpl(firestore);
+    }
+
+    @Bean
+    public ChatRoomService chatRoomService(ChatRoomRepository chatRoomRepository){
+        return new ChatRoomServiceImpl(chatRoomRepository);
+    }
+
+    @Bean
+    public ChatRoomController chatRoomController(ChatRoomService chatRoomService){
+        return new ChatRoomController(chatRoomService);
     }
 
 }

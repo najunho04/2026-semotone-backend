@@ -71,19 +71,6 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
-    @GetMapping("/{postId}/ai")
-    public ResponseEntity<?> getAiResult(@PathVariable String postId) {
-        try {
-            AiResultResDto aiResult = aiService.getAiResult(postId);
-            if (aiResult == null) {
-                return ResponseEntity.ok(AiResultResDto.builder().build());
-            }
-            return ResponseEntity.ok(aiResult);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("AI 결과 조회 실패: " + e.getMessage());
-        }
-    }
-
     @PostMapping("/{postId}/accept")
     public ResponseEntity<String> acceptPost(
             @PathVariable String postId,

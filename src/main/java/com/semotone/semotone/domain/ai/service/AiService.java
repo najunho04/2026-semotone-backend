@@ -3,6 +3,10 @@ package com.semotone.semotone.domain.ai.service;
 import com.semotone.semotone.domain.ai.dto.AiReqDto;
 import com.semotone.semotone.domain.ai.dto.AiResDto;
 import com.semotone.semotone.domain.ai.dto.AiResultResDto;
+import com.semotone.semotone.domain.ai.entity.AiResultEntity;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface AiService {
     /**
@@ -25,4 +29,6 @@ public interface AiService {
      * - 특정 게시물에 매핑된 AI 태그 정보를 DB에서 꺼내옵니다.
      */
     AiResultResDto getAiResult(String postId);
+
+    List<AiResultResDto> getAllAiResult();
 }

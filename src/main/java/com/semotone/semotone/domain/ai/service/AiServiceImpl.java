@@ -9,8 +9,10 @@ import com.semotone.semotone.domain.post.entity.PostEntity;
 import com.semotone.semotone.domain.post.repository.PostRepository;
 import com.semotone.semotone.util.GeminiClient;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class AiServiceImpl implements AiService {
 
@@ -89,4 +91,14 @@ public class AiServiceImpl implements AiService {
         Optional<AiResultEntity> optional = aiRepository.findByPostId(postId);
         return optional.map(AiResultResDto::fromEntity).orElse(null);
     }
+
+    @Override
+    public List<AiResultResDto> getAllAiResult() {
+        return aiRepository.findAllAiResult().stream().map(
+                aiResult -> AiResultResDto.fromEntity(aiResult)
+        ).collect(Collectors.toList());
+
+    }
+
+
 }
