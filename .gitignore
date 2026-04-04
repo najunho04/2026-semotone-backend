@@ -54,3 +54,7 @@ Thumbs.db
 # === [기타 비밀 키 (추후 환경변수 분리용)] ===
 application-secret.yml
 .env
+
+api-test.http
+AI_IMPLEMENTATION_PLAN.md
+.claude
