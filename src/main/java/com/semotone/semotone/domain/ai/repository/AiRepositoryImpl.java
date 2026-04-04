@@ -26,6 +26,7 @@ public class AiRepositoryImpl implements aiRepository {
      * AI 분석 결과를 Firestore에 저장
      * postId를 문서 ID로 사용하므로, 동일 postId로 재저장 시 덮어쓰기됨
      */
+    //o
     @Override
     public void saveAiReq(AiResultEntity aiResult) {
         try {
